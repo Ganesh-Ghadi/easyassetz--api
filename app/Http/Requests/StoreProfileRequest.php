@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreProfileRequest extends FormRequest
 {
@@ -22,7 +24,6 @@ class StoreProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            
             'user_id' => 'required|exists:users,id',
             'full_legal_name' => 'required|string|max:255',
             'gender' => 'required',
@@ -32,25 +33,21 @@ class StoreProfileRequest extends FormRequest
             'religion' => 'required|string',
             'marital_status' => 'nullable|string',
             'married_under_special_act' => 'required|string',
-        
-            // address details
             'correspondence_email' => 'required|string|email|max:255|unique:profiles',
             'permanent_house_flat_no' => 'required|string|max:255',
-            'permanent_address_line1' => 'required|string|max:255',
-            'permanent_address_line2' => 'nullable|string|max:255',
+            'permanent_address_line_1' => 'required|string|max:255',
+            'permanent_address_line_2' => 'nullable|string|max:255',
             'permanent_pincode' => 'required|string|max:10',
             'permanent_city' => 'required|string|max:255',
             'permanent_state' => 'nullable|string|max:255',
             'permanent_country' => 'nullable|string|max:255',
             'current_house_flat_no' => 'required|string|max:255',
-            'current_address_line1' => 'required|string|max:255',
-            'current_address_line2' => 'nullable|string|max:255',
+            'current_address_line_1' => 'required|string|max:255',
+            'current_address_line_2' => 'nullable|string|max:255',
             'current_pincode' => 'required|string|max:10',
             'current_city' => 'required|string|max:255',
             'current_state' => 'nullable|string|max:255',
             'current_country' => 'nullable|string|max:255',
-        
-            // KYC details adhar file and pan mandatory required_if
             'adhar_number' => 'sometimes|string|max:12',
             'adhar_name' => 'nullable|string|max:255',
             'adhar_file' => 'nullable|max:2048',
@@ -67,7 +64,14 @@ class StoreProfileRequest extends FormRequest
             'driving_licence_expiry_date' => 'nullable|string',
             'driving_licence_place_of_issue' => 'nullable|string|max:255',
             'driving_licence_file' => 'nullable|file|max:2048',
-
         ];
     }
+
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors();
+        throw new HttpResponseException(response()->json(['success'=>false, 'message' => $errors], 422));
+    }
+
 }
